@@ -18,6 +18,8 @@ library(dplyr)
 library(tibble)
 ```
 
+$\quad$
+
 # Ejercicio 1
 ```{r}
 (dado_honesto = sample (1:6, size = 100, replace = TRUE))
@@ -25,6 +27,10 @@ table(dado_honesto) #frecuencia absoluta R básico
 signif(prop.table(table(dado_honesto)),2) # frecuencia relativa R básico
 
 t = tibble(col_tirada = dado_honesto)
+```
+
+
+```{r}
 t %>%
   count(col_tirada) #frecuencia absoluta con dplyr
 t %>%
@@ -33,7 +39,10 @@ t %>%
 
 ```
 
+$\quad$
+
 # Ejercicio 2
+
 ### Trucamos un dado para duplicar la posibilidad de sacar un seis
 ```{r}
 (dado_cargado = sample(1:6, size = 100, replace = TRUE,
@@ -43,12 +52,16 @@ signif(prop.table(table(dado_cargado)),2) # frecuencia relativa
 
 ```
 
+$\quad$
+
 # Ejercicio 3
 ```{r}
 (v1 = rep(seq(from = 1, to = 4, by = 1), each = 4))
 (v2 = rep(seq(from = 1, to = 5, by = 1), times = c(1,2,3,4,5)))
 (v3 = rep(seq(from = 1, to = 4, by = 1), times = 4))
 ```
+
+$\quad$
 
 # Ejercicio 4
 
@@ -57,6 +70,9 @@ signif(prop.table(table(dado_cargado)),2) # frecuencia relativa
           filter(class == 'pickup') %>%
             select(starts_with("c")))
 ```
+
+
+$\quad$
 
 # Ejercicio 5
 
