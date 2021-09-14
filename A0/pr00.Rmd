@@ -1,0 +1,116 @@
+---
+title: "Práctica 0"
+author: "Álvaro Francisco Ruiz Cornejo"
+date: "14/9/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+ 
+
+```{r include = FALSE}
+library(tidyverse)
+library(dplyr)
+library(tibble)
+```
+
+# Ejercicio 1
+```{r}
+(dado_honesto = sample (1:6, size = 100, replace = TRUE))
+table(dado_honesto) #frecuencia absoluta R básico
+signif(prop.table(table(dado_honesto)),2) # frecuencia relativa R básico
+
+t = tibble(col_tirada = dado_honesto)
+t %>%
+  count(col_tirada) #frecuencia absoluta con dplyr
+t %>%
+  count(col_tirada) %>%
+  mutate(col_tirada, relFreq = prop.table(n), n = NULL) #frecuencia relativa con dplyr
+
+```
+
+# Ejercicio 2
+### Trucamos un dado para duplicar la posibilidad de sacar un seis
+```{r}
+(dado_cargado = sample(1:6, size = 100, replace = TRUE,
+                      prob = c((1/7),(1/7), (1/7), (1/7), (1/7),(2/7))))
+table(dado_cargado) #frecuencia absoluta
+signif(prop.table(table(dado_cargado)),2) # frecuencia relativa
+
+```
+
+# Ejercicio 3
+```{r}
+(v1 = rep(seq(from = 1, to = 4, by = 1), each = 4))
+(v2 = rep(seq(from = 1, to = 5, by = 1), times = c(1,2,3,4,5)))
+(v3 = rep(seq(from = 1, to = 4, by = 1), times = 4))
+```
+
+# Ejercicio 4
+
+```{r}
+(mpg2 <- mpg %>%
+          filter(class == 'pickup') %>%
+            select(starts_with("c")))
+```
+
+# Ejercicio 5
+
+```{r include = FALSE}
+library(haven)
+census <- read_dta("http://www.stata-press.com/data/r8/census.dta")
+```
+
+## 5.1
+
+```{r}
+(pob_region = census %>%
+              group_by(region) %>%
+                summarise(poblacion_total = sum(pop), n = n()))
+```
+
+## 5.2
+
+```{r}
+ggplot(pob_region) +
+  geom_col(aes(region, poblacion_total), fill = 'orange', 
+           color = 'black')
+```
+
+## 5.3
+```{r}
+(orden <- census %>%
+          arrange(desc(pop)))
+```
+
+## 5.4
+
+```{r}
+(tasa_matdiv <- census %>%
+  select(state) %>%
+  mutate(tasaMatrimono = 100 * census$marriage/census$pop,
+         tasaDivorcio = 100 * census$divorce/census$pop))
+```
+
+## 5.5
+```{r}
+census %>%
+  summarise(state, medage,
+            mediana = median(medage), desvMediana = (medage-mediana),
+            propMayorEdad = pop65p/pop) %>%
+    arrange(desc(propMayorEdad)) %>%
+      head(10)
+```
+
+## 5.6
+
+```{r}
+cortes = seq(min(census$medage), max(census$medage), length.out = 11)
+ggplot(data = census, aes(x=medage)) +
+  geom_histogram(mapping = aes(y=stat(density)), breaks = cortes,
+                 fill = "orange", color = "black") +
+  geom_density(color = "red", size = 1.5)
+```
+
