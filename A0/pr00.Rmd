@@ -2,7 +2,9 @@
 title: "Práctica 0"
 author: "Álvaro Francisco Ruiz Cornejo"
 date: "14/9/2021"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -89,9 +91,9 @@ ggplot(pob_region) +
 
 ```{r}
 (tasa_matdiv <- census %>%
-  select(state) %>%
-  mutate(tasaMatrimono = 100 * census$marriage/census$pop,
-         tasaDivorcio = 100 * census$divorce/census$pop))
+  select(state, marriage, divorce) %>%
+  mutate(tasa = divorce/marriage)) %>% 
+  arrange(desc(tasa))
 ```
 
 ## 5.5

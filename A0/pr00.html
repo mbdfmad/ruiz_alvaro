@@ -174,28 +174,28 @@ pre code {
 <div id="ejercicio-1" class="section level1">
 <h1>Ejercicio 1</h1>
 <pre class="r"><code>(dado_honesto = sample (1:6, size = 100, replace = TRUE))</code></pre>
-<pre><code>##   [1] 4 4 5 2 6 3 6 3 2 6 2 1 1 6 4 5 6 3 3 4 1 6 4 4 3 4 4 3 1 4 1 5 6 6 2 1 2
-##  [38] 5 3 1 6 1 1 4 6 5 1 3 4 5 5 3 4 6 4 4 5 1 5 2 3 3 2 5 4 5 4 3 3 3 2 4 2 4
-##  [75] 2 6 5 2 2 6 2 2 2 4 4 2 4 6 6 6 1 1 3 6 1 1 1 4 6 4</code></pre>
+<pre><code>##   [1] 1 4 1 1 4 1 5 2 1 4 1 3 2 2 2 6 1 6 1 4 3 4 2 3 5 3 6 3 4 5 6 6 5 2 6 2 5
+##  [38] 6 1 4 5 3 3 4 3 2 4 2 1 4 5 2 1 2 6 6 3 4 6 4 1 1 3 3 3 3 5 6 2 4 1 4 6 1
+##  [75] 1 3 1 6 4 6 4 1 3 2 5 3 5 6 6 1 3 3 6 3 1 4 3 5 3 6</code></pre>
 <pre class="r"><code>table(dado_honesto) #frecuencia absoluta R básico</code></pre>
 <pre><code>## dado_honesto
 ##  1  2  3  4  5  6 
-## 16 16 15 23 12 18</code></pre>
+## 20 13 21 17 11 18</code></pre>
 <pre class="r"><code>signif(prop.table(table(dado_honesto)),2) # frecuencia relativa R básico</code></pre>
 <pre><code>## dado_honesto
 ##    1    2    3    4    5    6 
-## 0.16 0.16 0.15 0.23 0.12 0.18</code></pre>
+## 0.20 0.13 0.21 0.17 0.11 0.18</code></pre>
 <pre class="r"><code>t = tibble(col_tirada = dado_honesto)
 t %&gt;%
   count(col_tirada) #frecuencia absoluta con dplyr</code></pre>
 <pre><code>## # A tibble: 6 x 2
 ##   col_tirada     n
 ##        &lt;int&gt; &lt;int&gt;
-## 1          1    16
-## 2          2    16
-## 3          3    15
-## 4          4    23
-## 5          5    12
+## 1          1    20
+## 2          2    13
+## 3          3    21
+## 4          4    17
+## 5          5    11
 ## 6          6    18</code></pre>
 <pre class="r"><code>t %&gt;%
   count(col_tirada) %&gt;%
@@ -203,11 +203,11 @@ t %&gt;%
 <pre><code>## # A tibble: 6 x 2
 ##   col_tirada relFreq
 ##        &lt;int&gt;   &lt;dbl&gt;
-## 1          1    0.16
-## 2          2    0.16
-## 3          3    0.15
-## 4          4    0.23
-## 5          5    0.12
+## 1          1    0.2 
+## 2          2    0.13
+## 3          3    0.21
+## 4          4    0.17
+## 5          5    0.11
 ## 6          6    0.18</code></pre>
 </div>
 <div id="ejercicio-2" class="section level1">
@@ -216,17 +216,17 @@ t %&gt;%
 <h3>Trucamos un dado para duplicar la posibilidad de sacar un seis</h3>
 <pre class="r"><code>(dado_cargado = sample(1:6, size = 100, replace = TRUE,
                       prob = c((1/7),(1/7), (1/7), (1/7), (1/7),(2/7))))</code></pre>
-<pre><code>##   [1] 4 6 1 1 3 1 5 4 6 2 5 5 2 2 1 6 5 6 4 2 1 1 6 3 5 5 6 6 4 6 4 6 5 2 4 6 3
-##  [38] 2 4 1 3 1 6 5 3 1 5 5 5 6 6 2 6 6 5 1 4 1 4 4 6 6 1 3 6 5 5 2 6 4 6 4 2 4
-##  [75] 5 3 2 6 6 4 2 4 6 3 2 3 3 5 5 1 3 6 6 4 1 5 1 4 1 6</code></pre>
+<pre><code>##   [1] 2 6 3 1 5 6 2 6 3 6 6 6 6 6 5 6 5 3 5 3 1 1 3 4 2 6 4 5 5 1 5 1 6 6 1 4 4
+##  [38] 6 6 2 2 2 4 2 3 1 6 1 5 3 4 3 5 4 2 6 5 2 4 6 6 6 6 3 2 2 2 4 1 6 6 6 1 3
+##  [75] 1 5 1 6 2 6 6 5 2 5 1 4 6 3 6 5 6 1 6 1 6 6 3 3 6 3</code></pre>
 <pre class="r"><code>table(dado_cargado) #frecuencia absoluta</code></pre>
 <pre><code>## dado_cargado
 ##  1  2  3  4  5  6 
-## 16 12 11 17 18 26</code></pre>
+## 15 14 14 10 14 33</code></pre>
 <pre class="r"><code>signif(prop.table(table(dado_cargado)),2) # frecuencia relativa</code></pre>
 <pre><code>## dado_cargado
 ##    1    2    3    4    5    6 
-## 0.16 0.12 0.11 0.17 0.18 0.26</code></pre>
+## 0.15 0.14 0.14 0.10 0.14 0.33</code></pre>
 </div>
 </div>
 <div id="ejercicio-3" class="section level1">
@@ -303,22 +303,22 @@ t %&gt;%
 <div id="section-3" class="section level2">
 <h2>5.4</h2>
 <pre class="r"><code>(tasa_matdiv &lt;- census %&gt;%
-  select(state) %&gt;%
-  mutate(tasaMatrimono = 100 * census$marriage/census$pop,
-         tasaDivorcio = 100 * census$divorce/census$pop))</code></pre>
-<pre><code>## # A tibble: 50 x 3
-##    state       tasaMatrimono tasaDivorcio
-##    &lt;chr&gt;               &lt;dbl&gt;        &lt;dbl&gt;
-##  1 Alabama             1.26         0.687
-##  2 Alaska              1.33         0.875
-##  3 Arizona             1.11         0.732
-##  4 Arkansas            1.16         0.695
-##  5 California          0.891        0.564
-##  6 Colorado            1.21         0.643
-##  7 Connecticut         0.838        0.434
-##  8 Delaware            0.747        0.389
-##  9 Florida             1.11         0.734
-## 10 Georgia             1.29         0.636
+  select(state, marriage, divorce) %&gt;%
+  mutate(tasa = divorce/marriage)) %&gt;% 
+  arrange(desc(tasa))</code></pre>
+<pre><code>## # A tibble: 50 x 4
+##    state       marriage divorce  tasa
+##    &lt;chr&gt;          &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+##  1 Oregon         23004   17762 0.772
+##  2 Indiana        57853   40006 0.692
+##  3 Florida       108344   71579 0.661
+##  4 Arizona        30223   19908 0.659
+##  5 Alaska          5361    3517 0.656
+##  6 California    210864  133541 0.633
+##  7 New Mexico     16641   10426 0.627
+##  8 N. Carolina    46718   28050 0.600
+##  9 Washington     47728   28642 0.600
+## 10 Arkansas       26513   15882 0.599
 ## # ... with 40 more rows</code></pre>
 </div>
 <div id="section-4" class="section level2">
