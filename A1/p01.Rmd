@@ -3,9 +3,9 @@ title: "Tarea 1"
 author: "Álvaro Francisco Ruiz Cornejo"
 date: "15/9/2021"
 output:
-  html_document: default
   pdf_document: 
      latex_engine: xelatex 
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
