@@ -1,0 +1,347 @@
+---
+title: "Tarea 1"
+author: "Álvaro Francisco Ruiz Cornejo"
+date: "15/9/2021"
+output:
+  html_document: default
+  pdf_document: 
+     latex_engine: xelatex 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo = FALSE, results = 'hide', message = FALSE}
+library(tidyverse)
+library(nycflights13)
+library(gridExtra)
+chlstrl <- read.csv(url("https://gist.githubusercontent.com/fsansegundo/ee991e53e1a571dd34034c42b5516eae/raw/2206455b5772e90c5a2a24a3f42a84408fd1d1c5/cholesterol.csv"))
+
+```
+
+
+
+# Ejercicio 1. Análisis exploratorio de un conjunto de datos y operaciones con dplyr.
+
+$\quad$
+
+En primer lugar, comprobamos que los datos han sido cargados correctamente en un dataframe de R, mostrando únicamente las primeras filas.
+
+```{r}
+head(chlstrl)
+```
+
+$\quad$
+
++ **¿Cuántas observaciones tiene?**
+
+```{r}
+dim(chlstrl) # Número de filas y columnas, respectivamente
+nrow(chlstrl) # Número de filas
+ncol(chlstrl) # Número de columnas
+```
+$\quad$
+
+$\quad$
+
+$\quad$
+
++ **¿Cúales son las variables y de qué tipo?**
+
+```{r}
+summary.default(chlstrl)
+```
+
+$\quad$
+
++ **¿Hay datos ausentes?¿Cuántos?¿En qué variables y posición están?**
+
+```{r}
+any(is.na(chlstrl)) # ¿Hay algún dato ausente?
+sum(is.na(chlstrl)) # ¿Cuántos datos ausentes hay?
+apply(is.na(chlstrl),2,which) # ¿Dónde están los datos ausentes?
+```
+
+$\quad$
+
++ **El análisis exploratorio (numérico y gráfico) debe cubrir todos los tipos de variable de la tabla. Es decir, que al menos debes estudiar una variable por cada tipo de variable presente en la tabla.**
+
+
+A continuación se va a realizar el estudio de una variable de tipo numérico, por ejemplo, el colesterol. Es una variable continua sobre la que vamos a realizar un estudio numérico básico y la presentación de una serie de gráficas acorde a la información contenida en la variable.
+
+```{r}
+summary(chlstrl$chol) # Información numérica básica de la variable
+```
+
+```{r warning = FALSE}
+cortes = seq(min(chlstrl$chol, na.rm = TRUE), max(chlstrl$chol, na.rm = TRUE), 
+             length.out = 21)
+ggplot(data = chlstrl, mapping = aes(x = chol)) +
+  geom_histogram(aes(y = stat(density)), breaks = cortes, color = "black", fill = "red") +
+  geom_density(color = "yellow", size = 2)
+```
+
+```{r warning = FALSE}
+ggplot(data = chlstrl) + 
+  geom_violin(mapping = aes(x = 0, y = chol)) + 
+  scale_x_discrete(breaks = c()) +
+  geom_boxplot(mapping = aes(y = chol), fill = "yellow") +
+  geom_jitter(aes(x = 0, y = chol), position = position_jitter(w = 0.05, h = 0),
+              col = "red")
+```
+
+$\quad$
+
+Por último, vamos a estudiar la variable *gender* como variable de tipo factor, que puede tomar los valores male/female únicamente. Para ello, la convertiremos en una variable de este tipo y calcularemos tanto su tabla de frecuencias (relativas y absolutas) como un diagrama de barras que reflejen los resultados.
+
+```{r}
+chlstrl$gender = factor(chlstrl$gender) # Conversión de la variable a tipo factor
+```
+
+
+```{r}
+chlstrl %>% 
+  count(gender) # Tabla de frecuencias absolutas
+
+chlstrl %>% 
+  count(gender) %>% 
+  mutate(relFreq = prop.table(n), n = NULL) # Tabla de frecuencias relativas
+```
+
+```{r warning = FALSE}
+ggplot(data = chlstrl) +
+  geom_bar(mapping = aes(x = gender), colour = "white", fill = c("red", "yellow"),
+           width = 0.65)
+```
+
+$\quad$
+
++ **Los valores de height y weight están en pulgadas (inches) y libras (pounds) respectivamente. Una ibra son ≈ 0.454kg y una pulgada son ≈ 0.0254m. Usa dplyr para convertir esas columnas a metros y kilogramos respectivamente. Las nuevas columnas deben llamarse igual que las originales.**
+
+
+```{r}
+chlstrl <- chlstrl %>% 
+              mutate(height = height*0.0254, weight = weight*0.454)
+```
+
+```{r}
+chlstrl %>% 
+  head(10) # Mostramos únicamente las 10 primeras filas
+```
+
+$\quad$
+
++ **Ahora usa esos valores de height y weight para añadir una nueva columna llamada BMI, que sea el resultado de dividir el peso entre la altura al cuadrado**
+
+```{r}
+chlstrl <- chlstrl %>%  
+             mutate(BMI = weight/((height)^2))
+```
+
+```{r}
+chlstrl %>% 
+  head(10) # Mostramos únicamente las 10 primeras filas
+```
+
+$\quad$
+
++ **Crea una nueva columna llamada ageGroup dividiendo la edad en los siguientes tres niveles: (10,40], (40,70], (70,100]**
+
+```{r}
+chlstrl <- chlstrl %>% 
+              mutate(ageGroup = cut(age, breaks = c(10,40,70,100), 
+              labels = c("(10,40]", "(40,70]", "(70,100]"),
+              include.lowest = FALSE, right = TRUE))
+```
+
+
+```{r}
+chlstrl %>% 
+  head(10) # Mostramos únicamente las 10 primeras filas
+```
+
++ **Usando dplyr calcula cuántas observaciones hay en cada nivel de ageGroup (indicación: usa group_by).**
+
+```{r}
+chlstrl %>% 
+  group_by(ageGroup) %>% 
+  count()
+```
+
+$\quad$
+
++ **Ahora, usando aquellas observaciones que corresponden a mujeres, ¿cuál es la media del nivel de colesterol y de BMI en cada uno de esos grupos de edad?**
+
+```{r}
+(chlstrl %>% 
+  group_by(ageGroup) %>% 
+  filter(gender == "female") %>% 
+  summarise("media_chol" = mean(chol, na.rm = TRUE),
+            "media_BMI" = mean(BMI, na.rm = TRUE)))
+```
+
+$\quad$
+
+# Ejercicio 2. Funciones de R.
+
++ **Crea una función de R llamada cambiosSigno que dado un vector x de números enteros no nulos, como -12, -19, 9, -13, -14, -17, 8, -19, -14, calcule cuántos cambios de signo ha habido. Es decir, cuántas veces el signo de un elemento es distinto del signo del elemento previo. Por ejemplo, en el vector anterior hay 4 cambios de signo (en las posiciones 3, 4, 7 y 8).**
+
+La implementación en R de la función es la siguiente:
+
+```{r}
+cambiosSigno = function(vector){
+  numCambios = 0
+  for(k in 2:length(vector)){
+    if(vector[k]*vector[k-1] < 0){
+      numCambios = numCambios + 1
+    }
+  }
+  return(numCambios)
+}
+
+```
+
+A partir del vector dado como ejemplo y haciendo una llamada a la función creada, obtenemos el número total de cambios de signo en dicho vector:
+
+```{r}
+vector = c(-12,-19,9,-13,-14,-17,8,-19,-14)
+cambiosSigno(vector)
+```
+
+$\quad$
+
++ **Modifica la función para que devuelva como resultado las posiciones donde hay cambios de signo. Llama cambiosSignoPos(x) a esa otra función. Por ejemplo, para el vector anterior el resultado de esta función sería [1] 3 4 7 8.**
+
+De nuevo, la implentación en R sería la siguiente:
+
+```{r}
+cambiosSignoPos = function(vector){
+  listaCambios = c()
+  for(k in 2:length(vector)){
+    if(vector[k]*vector[k-1] < 0){
+      listaCambios = append(listaCambios, k) 
+    }
+  }
+  return(listaCambios)
+}
+```
+
+Y la lista con las posiciones en las que ha cambiado el signo:
+
+```{r}
+vector = c(-12,-19,9,-13,-14,-17,8,-19,-14)
+cambiosSignoPos(vector)
+```
+
+$\quad$
+
++ **También se valorará que incluyas en el código como usar sample para generar vectores aleatorios de 20 enteros no nulos (el vector debe poder tomar valores positivos y negativos).**
+
+Se comprueba el funcionamiento de ambas funciones a partir de un vector generado aleatoriamente:
+
+```{r}
+valores = c(-10:-1,1:10)
+(rVector = sample(valores, size = 20, replace = TRUE)) # Vector generado aleatoriamente
+cambiosSigno(rVector) # Número total de cambios de signo
+cambiosSignoPos(rVector) # Lista de posiciones donde ha cambiado el signo
+```
+
+$\quad$
+
+# Ejercicio 3. R4DS.
+
+$\quad$
+
++ **Haz el ejercicio 6 de la Sección 3.6.1 de R4DS.**
+
+La forma de implementar las gráficas en código R es la siguiente:
+
+```{r}
+g1 <- ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+
+g2 <- ggplot(data = mpg, mapping = aes(x = displ, y = hwy, group = drv)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+
+g3 <- ggplot(data = mpg, mapping = aes(x = displ, y = hwy, colour = drv)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+
+g4 <- ggplot() + 
+  geom_point(data = mpg, mapping = aes(x = displ, y = hwy, colour = drv)) +
+  geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy), se = FALSE)
+
+g5 <- ggplot() + 
+  geom_point(data = mpg, mapping = aes(x = displ, y = hwy, colour = drv)) +
+  geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy, linetype = drv), se = FALSE)
+
+g6 <- ggplot(data = mpg, aes(x = displ, y = hwy)) +
+  geom_point(size = 3, colour = "white") + 
+  geom_point(aes(colour = drv), size = 1)
+```
+
+
+El resultado de las seis gráficas, agrupadas en 3 filas se muestra a continuación:
+
+```{r message = FALSE}
+grid.arrange(g1,g2,g3,g4,g5,g6, nrow = 3)
+```
+
+$\quad$
+
++ **Haz el ejercicio 1 de la Sección 5.2.4 de R4DS.**
+
+Utilizamos la tabla flights de la librería nycflights13 para responder las siguientes cuestiones:
+
++ Todos los vuelos que hayan tenido un retraso de dos o más horas:
+
+```{r}
+names(flights)
+flights %>%
+  filter(arr_delay >= 120)
+```
+
+
++ Todos los vuelos que volaron a Houston (IAH o HOU):
+
+```{r}
+flights %>% 
+  filter(dest %in% c('HOU','IAH'))
+```
+
++ Todos los vuelos que fueron operados por "United", "América" o "Delta":
+
+```{r}
+flights %>% 
+  filter(carrier %in% c('UA','AA','DL'))
+```
+
++ Todos los vuelos que partieron en verano (julio, agosto o septiembre):
+```{r}
+flights %>% 
+  filter(month %in% c(7:9))
+```
+
++ Todos los vuelos que llegaron más de dos horas tarde pero que salieron a su hora:
+```{r}
+flights %>% 
+  filter(dep_delay <= 0, arr_delay > 120)
+```
+
+$\quad\\[3mm]$
+
++ Todos los vuelos que se retrasaron una hora pero que recuperaron 30 minutos durante el vuelo:
+```{r}
+flights %>% 
+  filter(dep_delay >= 60, dep_delay - arr_delay > 30)
+```
+
++ Todos los vuelos que salieron entre medianoche y las seis de la mañana:
+```{r}
+flights %>% 
+  filter(dep_time <= 600 | dep_time == 2400)
+```
+
