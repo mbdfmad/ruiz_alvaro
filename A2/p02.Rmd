@@ -1,0 +1,328 @@
+---
+title: "Tarea 2"
+author: "Álvaro Francisco Ruiz Cornejo"
+date: "18/9/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo = FALSE, message = FALSE, eval=TRUE}
+library(tidyverse)
+```
+
+# Ejercicio 1. Simulando variables aleatorias discretas.
+
+$\quad$
+
++ **Apartado 1: La variable aleatoria discreta X1 tiene esta tabla de densidad de probabilidad (es la variable que se usa como ejemplo en la Sesión). Calcula la media y la varianza teóricas de esta variable.**
+
+
+$$
+\begin{array}{|c|c|c|c|c|c|c|}
+\hline
+\text{valor de }X1 & 0 & 1 & 2 & 3 \\
+\hline
+\text{Probabilidad de ese valor }P(X = x_i) & \dfrac{64}{125} &
+\dfrac{48}{125}& \dfrac{12}{125} & \dfrac{1}{125}\rule{0mm}{6mm} \\[3mm]
+\hline
+\end{array}
+$$
+
+$\quad$
+
+Convertimos la tabla a información legible por R:
+
+```{r}
+xi = c(0,1,2,3)
+pi = c(64/125, 48/125, 12/125, 1/125)
+```
+
+$\quad$
+
+Calculamos la media teórica, multiplicando cada valor de x1 por su correspondiente probabilidad:
+
+```{r}
+(media = as.numeric(xi %*% pi)) # Producto escalar
+```
+
+$\quad$
+
+De igual manera, calculamos la varianza teórica de la siguiente manera:
+
+```{r}
+(varianza = sum((xi - media)^2 * pi))
+```
+
+
+$\quad$
+
++ **Apartado 2: Combina sample con replicate para simular cien mil muestras de tamaño 10 de esta variable X1. Estudia la distribución de las medias muestrales como hemos hecho en ejemplos previos, ilustrando con gráficas la distribución de esas medias muestrales. Cambia después el tamaño de la muestra a 30 y repite el análisis.**
+
+```{r}
+k = 100000
+poblacion = 0:3
+
+mediasMuestrales = replicate(k, {
+  muestra = sample(poblacion, size = 30, replace = TRUE, prob = c(64, 48, 12, 1))
+  mean(muestra)
+})
+```
+
+
+Observamos las medias de nuestra muestra de tamaño 30 en las diez primeras iteraciones del replicate:
+
+```{r}
+head(mediasMuestrales, 10)
+```
+
+$\quad$
+
+El histograma visualiza el resultado de las todas las medias muestrales obtenidas, sobre el que aparece pintada la línea azul discontinua que muestra la media teórica.
+
+```{r}
+hist(mediasMuestrales, breaks = 40, main = "",
+     col = "peachpuff", probability = TRUE, xlim = range(0:3))
+lines(density(mediasMuestrales), lwd = 3, col = "red")
+abline(v = media, lty=2, lwd=5, col="blue")
+
+```
+
+$\quad$
+
+Repetimos el experimento con muestras de tamaño 100 y tenemos el siguiente resultado:
+
+```{r echo = FALSE, eval = TRUE}
+k = 100000
+poblacion = 0:3
+
+mediasMuestrales = replicate(k, {
+  muestra = sample(poblacion, size = 100, replace = TRUE, prob = c(64, 48, 12, 1))
+  mean(muestra)
+})
+```
+
+```{r}
+hist(mediasMuestrales, breaks = 40, main = "",
+     col = "peachpuff", probability = TRUE, xlim = range(0:3))
+lines(density(mediasMuestrales), lwd = 3, col = "red")
+abline(v = media, lty=2, lwd=5, col="blue")
+
+```
+
+Con muestras de mayor tamaño se aprecia mejor el objetivo de este problema, comprobar el Teorema Central del Límite. Esto es, la media de las medias muestrales coincide con la media de la población.y prácticamente no hay muestras malas. Es extremadamente improbable que unamuestra elegida al azar sea muy mala. Además se observa que la distribución de las medias muestrales tiene forma de campana (y es muy estrecha).
+
+$\quad$
+
++ **Apartado 3: La variable aleatoria discreta X2 tiene esta tabla de densidad de probabilidad. Suponemos que X1 y X2 son independientes. ¿Qué valores puede tomar la suma X1 + X2? ¿Cuál es su tabla de probabilidad?**
+
+
+$$
+\begin{array}{|c|c|c|c|c|c|}
+\hline
+\text{valor de }X2 & 0 & 1 & 2 \\
+\hline
+\text{Probabilidad de ese valor }P(X = x_i) & \dfrac{1}{2} &
+\dfrac{1}{4}&  \dfrac{1}{4}\rule{0mm}{6mm} \\[3mm]
+\hline
+\end{array}
+$$
+$\quad$
+
+El rango valores que puede tomar la suma de ambos es de 0 a 5.
+
+```{r}
+x1 = c(0,1,2,3)
+p1 = c(64/125, 48/125, 12/125, 1/125)
+x2 = c(0,1,2)
+p2 = c(1/2,1/4,1/4)
+```
+
+
+```{r}
+(t1 = p2 %*% t(p1)) # Tabla con la probabilidad combinada de los distintos sucesos
+(t2 = outer(x2, x1, FUN = "+")) # Tabla con la suma de los números de x1 y x2
+
+(datos <- data.frame # Asociamos las diferentes sumas con su probabilidad
+          (probab = c(t1), suma = c(t2)))                                                                                
+
+(probabilidades <- datos %>% # Agrupamos la tabla anterior y sumamos la probabilidad
+                  group_by(suma = suma) %>% 
+                  summarize(prob = sum(probab)))  
+```
+
+$\quad$
+
++ **Apartado 4: Calcula la media teórica de la suma X1 + X2. Después usa sample y replicate para simular cien mil valores de esta variable suma. Calcula la media de esos valores. Advertencia: no es el mismo tipo de análisis que hemos hecho en el segundo apartado.**
+
+La media teórica de la suma coincide con la suma de las medias, por lo tanto:
+```{r}
+media1 = as.numeric(x1 %*% p1)
+media2 = as.numeric(x2 %*% p2)
+(mediaSuma = media1 + media2)
+```
+
+Lo comprobamos también con el producto escalar del resultado obtenido en el apartado anterior y vemos que, efectivamente coinciden.
+
+```{r}
+(mediaSuma2 = as.numeric(probabilidades$suma %*% probabilidades$prob))
+```
+
+Utilizamos los métodos de  sample y replicate para simular cien mil valores de esta variable suma y hacemos la media de las mediasMuestrales:
+```{r}
+k = 100000
+
+mediasMuestrales = replicate(k, {
+  muestra1 = sample(x1, size = 1, replace = TRUE, prob = p1)
+  muestra2 = sample(x2, size = 1, replace = TRUE, prob = p2)
+  muestra1 + muestra2
+})
+
+mean(mediasMuestrales)
+```
+
+El resultado es muy similar al obtenido de manera teórica, validando así nuestro modelo.
+
+$\quad\\[2.5mm]$
+
+
+# Ejercicio 2. Datos limpios.
+
+$\quad$
+
+**Este fichero contiene las notas de los alumnos de una clase, que hicieron dos tests cada semana durante cinco semanas. La tabla de datos no cumple los principios de tidy data que hemos visto en clase. Tu tarea en este ejercicio es explicar por qué no se cumplen y obtener una tabla de datos limpios con la misma información usando tidyR.**
+
+En primer lugar, mostramos las 6 primeras observaciones de la tabla para poder comprobar la presencia de datos no limpios en la misma.
+
+```{r, message = FALSE}
+datos <- read_csv("data/testResults.csv")
+head(datos, 6)
+```
+Como se ha podido comprobar, la columna "gender_age" presenta información de dos variables distintas: "gender" y "age", por lo que las vamos a separar. Por otro lado, en vez de tener 5 variables (columnas) para cada una de las semanas, haremos una tabla más larga que contenga información para cada semana y su correspondiente valor.
+
+La implementación del código R que lleva a cabo dichas modificaciones es el siguiente:
+
+```{r}
+datosLimpios <- datos %>%
+                separate(gender_age, into = c("gender", "age"), sep = "_", convert = TRUE) %>%
+                pivot_longer(c("week1", "week2", "week3", "week4", "week5"), names_to = "week_number",
+                             values_to = "value")
+```
+
+```{r}
+head(datosLimpios, 15)
+```
+
+Se comprueba una tabla más larga, pero con los datos mucho más limpios para trabajar con ellos y llevar a cabo cualquier tipo de análisis.
+
+$\quad\\[2.5mm]$
+
+
+# Ejercicio 3. Lectura de R4DS.
+
+$\quad$
+
+**Continuando con nuestra lectura conjunta de este libro, si revisas el índice verás que hemos cubierto (holgadamente en algún caso) el contenido de los Capítulos 6, 8, 9, 10 y 11. Todos esos Capítulos son relativamente ligeros. Por eso esta semana conviene detenerse un poco en la lectura de los Capítulos 7 y 12, que son los más densos en información. Y como motivación os proponemos un par de ejercicios, uno por cada uno de esos capítulos.**
+
+$\quad$
+
++ **Haz el ejercicio 2 de la Sección 7.5.1.1 de R4DS. Las ideas de esa sección son importantes para nuestro trabajo de las próximas sesiones.**
+
+El capítulo sugiere la visualización de las distintas variables continuas de la siguiente manera:
+
+```{r}
+ggplot(data = diamonds, mapping = aes(x = carat, y = price)) +
+  geom_boxplot(mapping = aes(group = cut_width(carat, 0.1)), orientation = "x")
+```
+
+Observamos una relación negativa y débil entre la variable color y precio. La escala va de peor (J) a mejor (D). Por tanto, los niveles de color están en el orden equivocado. Para ello, se revierten el orden del nivel de color a lo largo del eje X.
+
+```{r}
+diamonds %>%
+  mutate(color = fct_rev(color)) %>%
+  ggplot(aes(x = color, y = price)) +
+  geom_boxplot()
+```
+
+
+También observamos una relación negativa débil entre la variable claridad y precio. La escala de claridad va de mejor (IF) a peor (I1).
+
+```{r}
+ggplot(data = diamonds) +
+  geom_boxplot(mapping = aes(x = clarity, y = price))
+```
+
+Tanto para la variable claridad como para la variable color, hay mucha más variación entre cada categoría que entre todas las categorías. Por tanto, "carat" es el mejor predictor de los precios de diamante.
+
+Ahora vemos la correlación de esta variable con "cut":
+
+```{r}
+ggplot(diamonds, aes(x = cut, y = carat)) +
+  geom_boxplot()
+```
+
+Se comprueba una ligera relación negativa entre ambas variables. Notablemente, los diamantes con la variable "carat" más alta, tienen el menor "cut" (Fair).
+
+Podemos extraer como conclusión que un diamante más pequeño, requiere de un mejor corte, mientras que uno más grande puede ser vendido con una calidad menor.
+
+
+$\quad\\[2.5mm]$
+
++ **Haz el ejercicio 4 de la Sección 12.6.1 de R4DS. ¡Aprovecha el código previo de esa sección para trabajar con datos limpios!**
+
+En primer lugar, utilizamos el código empleado en la sección del libro para trabajar con datos limpios:
+```{r}
+whov1 <- who %>%
+  pivot_longer(
+    cols = new_sp_m014:newrel_f65,
+    names_to = "key",
+    values_to = "number_of_cases",
+    values_drop_na = TRUE
+  )
+```
+
+```{r}
+whov2 <- whov1 %>%
+  mutate(names_from = stringr::str_replace(key, "newrel", "new_rel"))
+```
+
+
+```{r warning = FALSE}
+whov3 <- whov2 %>%
+  separate(key, c("new", "type", "sexage"), sep = "_")
+```
+
+
+```{r}
+whov4 <- whov3 %>%
+  select(-new, -iso2, -iso3)
+```
+
+```{r}
+whov5 <- whov4 %>%
+  separate(sexage, c("sex", "age"), sep = 1)
+```
+
+$\quad$
+
+Para cada país, año y sexo calculamos el numero total de casos. Puesto que la información de años anteriores al 1995 representan un 0.55% respecto al número total de observaciones (420 frente a 76046) filtraremos por esta condición para una mejor visualización de los datos.
+
+```{r message = FALSE}
+whov5 %>%
+  group_by(country, year, sex) %>%
+  filter(year > 1994) %>%
+  summarise(cases = sum(number_of_cases)) %>%
+  unite(country_and_sex, country, sex, remove = FALSE) %>%
+  ggplot(aes(x = year, y = cases, group = country_and_sex, color = sex)) +
+  geom_line()
+
+```
+
+
+
+
+
